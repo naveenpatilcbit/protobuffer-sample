@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "org.protobuffsample.demo.pojo";
+option java_outer_classname = "EmployeeProto";
+
+// Define the User message
+message Employee {
+    int32 id = 1;
+    float salary = 2;
+    string designation = 3;
+    string name = 4;
+}
+
+message EmployeeList {
+    repeated Employee  employees = 1;
+}
