@@ -67,6 +67,9 @@ public class AdvFileUploadController {
      * Merges all the chunk files for a given session into a single file.
      */
     private void mergeChunks(String uniqueId, int totalChunks,String actualFileName) throws IOException {
+
+        System.out.println("merge files began" + new Date());
+
         Path uniqueIdDir = Paths.get(UPLOAD_DIR, uniqueId);
         Path mergedFilePath = Paths.get(UPLOAD_DIR, actualFileName);
 
@@ -90,7 +93,7 @@ public class AdvFileUploadController {
         // Optionally delete the chunk files or the session folder if you don't need them
          cleanUpSessionDirectory(uniqueIdDir);
 
-        System.out.println("Merged file created at: " + mergedFilePath.toAbsolutePath());
+        System.out.println("Merged file created at: " + new Date());
     }
 
     private void cleanUpSessionDirectory(Path sessionDir) throws IOException {
