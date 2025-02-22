@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Simple MP4 Player</title>
+    <script>
+      /**
+       * uploadFileInChunks - Splits a file into chunks and uploads them in parallel.
+       *
+       * @param {File} file The file to be uploaded
+       * @param {string} uploadUrl The endpoint that accepts file chunk uploads
+       * @param {number} chunkSize The size of each chunk in bytes (e.g. 5 * 1024 * 1024 for 5 MB)
+       * @returns {Promise<void>} A promise that resolves when all chunks have been uploaded
+       */
+      async function uploadFileInChunks(
+        file,
+        uploadUrl,
+        chunkSize = 5 * 1024 * 1024
+      ) {
+        // Calculate number of chunks
+        const totalChunks = Math.ceil(file.size / chunkSize);
+        const chunkPromises = [];
+
+        for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+          // Calculate start and end points of this chunk
+          const start = chunkIndex * chunkSize;
+          const end = Math.min(start + chunkSize, file.size);
+
+          // Slice the file into this chunk
+          const fileChunk = file.slice(start, end);
+
+          // Build form data or payload (depending on server expectation)
+          const formData = new FormData();
+          formData.append("fileChunk", fileChunk);
+          formData.append("chunkIndex", chunkIndex);
+          formData.append("totalChunks", totalChunks);
+          //randomly generated unique id.
+          formData.append("uniqueId", "ABC");
+          formData.append("actualFileName", file.name);
+          // Create a promise for the fetch request
+          const uploadPromise = fetch(uploadUrl, {
+            method: "POST",
+            body: formData,
+          }).then((response) => {
+            if (response.status != 200) {
+              throw new Error(`Chunk ${chunkIndex} failed to upload`);
+            }
+            return "SUCCESS";
+          });
+
+          chunkPromises.push(uploadPromise);
+        }
+
+        // Wait for all chunk uploads to complete
+        await Promise.all(chunkPromises);
+
+        console.log("All chunks uploaded successfully!" + new Date());
+      }
+
+      // Usage example:
+
+      document.onreadystatechange = function () {
+        if (document.readyState === "complete") {
+          document
+            .getElementById("uploadButton")
+            .addEventListener("click", async () => {
+              console.log("file upload started" + new Date());
+              const fileInput = document.getElementById("fileInput");
+              const file = fileInput.files[0];
+              try {
+                await uploadFileInChunks(
+                  file,
+                  "http://34.57.225.178:8080/upload",
+                  5 * 1024 * 1024
+                );
+              } catch (error) {
+                console.error("Error uploading file in chunks:", error);
+              }
+            });
+
+          document
+            .getElementById("multiPartUpload")
+            .addEventListener("click", async () => {
+              const formData = new FormData();
+              const fileInput = document.getElementById("fileInput");
+              const file = fileInput.files[0];
+              formData.append("file", file);
+              try {
+                // 4. Send a POST request using the Fetch API
+                console.log("sending file" + new Date());
+                const response = await fetch(
+                  "http://34.57.225.178:8080/multipart-file-upload",
+                  {
+                    method: "POST",
+                    body: formData,
+                  }
+                );
+
+                // 5. Handle the response
+                if (response.ok) {
+                  const msg = await response.text();
+                  console.log("sent file" + new Date());
+                } else {
+                  const err = await response.text();
+                  alert("Upload failed. Server responded with: " + err);
+                }
+              } catch (error) {
+                console.error("Error during upload:", error);
+                alert("Error: " + error.message);
+              }
+            });
+        }
+      };
+    </script>
+  </head>
+  <body>
+    <input type="file" id="fileInput" />
+    <button id="uploadButton">Adv Submit</button>
+    <button id="multiPartUpload">Multipart Submit</button>
+  </body>
+</html>
