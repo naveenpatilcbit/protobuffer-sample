@@ -32,6 +32,7 @@ public class AdvFileUploadController {
                              @RequestParam("actualFileName") String actualFileName
    ){
        try {
+           System.out.println("chunk Index started" + chunkIndex);
        totalChunksMap.putIfAbsent(uniqueId, totalChunks);
        Path sessionDir = Paths.get(UPLOAD_DIR, uniqueId);
        if (!Files.exists(sessionDir)) {
@@ -57,6 +58,7 @@ public class AdvFileUploadController {
                // Return success, but not the final chunk
 
            }
+           System.out.println("chunk Index completed" + chunkIndex);
        } catch (IOException e) {
            throw new RuntimeException(e);
        }
