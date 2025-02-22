@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -93,6 +94,7 @@ public class AdvFileUploadController {
     }
 
     private void cleanUpSessionDirectory(Path sessionDir) throws IOException {
+        System.out.println("cleanup started" + new Date());
         if (Files.exists(sessionDir)) {
             Files.walk(sessionDir)
                     .sorted((p1, p2) -> p2.compareTo(p1)) // delete children before directory
@@ -104,5 +106,6 @@ public class AdvFileUploadController {
                         }
                     });
         }
+        System.out.println("cleanup completed" + new Date());
     }
 }
